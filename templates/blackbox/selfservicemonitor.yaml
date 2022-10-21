@@ -1,0 +1,30 @@
+{{- if .Values.blackbox.serviceMonitor.selfMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "kube-prometheus-stack.fullname" $ }}
+  namespace: {{ template "kube-prometheus-stack.namespace" $ }}
+  labels:
+    {{- include "kube-prometheus-stack.labels" $ | nindent 4 }}
+    {{- if or $.Values.blackbox.serviceMonitor.selfMonitor.labels .labels }}
+    {{- toYaml (.labels | default $.Values.blackbox.serviceMonitor.selfMonitor.labels) | nindent 4 }}
+    {{- end }}
+spec:
+  endpoints:
+  - path: /metrics
+    interval: {{ .interval | default $.Values.blackbox.serviceMonitor.selfMonitor.interval }}
+    scrapeTimeout: {{ .scrapeTimeout | default $.Values.blackbox.serviceMonitor.selfMonitor.scrapeTimeout }}
+    scheme: http
+    relabelings:
+{{- if concat (.additionalRelabeling | default list) $.Values.blackbox.serviceMonitor.selfMonitor.additionalRelabeling }}
+{{ toYaml (concat (.additionalRelabeling | default list) $.Values.blackbox.serviceMonitor.selfMonitor.additionalRelabeling) | indent 6 }}
+{{- end }}
+  jobLabel: "{{ $.Release.Name }}"
+  selector:
+    matchLabels:
+      {{- include "kube-prometheus-stack.selectorLabels" $ | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ template "kube-prometheus-stack.namespace" $ }}
+{{- end }}

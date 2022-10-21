@@ -1,0 +1,18 @@
+{{- if .Values.blackbox.pspEnabled }}
+apiVersion: {{ template "rbac.apiVersion" . }}
+kind: Role
+metadata:
+  labels:
+    {{- include "kube-prometheus-stack.labels" . | nindent 4 }}
+  name: {{ template "kube-prometheus-stack.fullname" . }}
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+rules:
+  - apiGroups:
+    - policy
+    resources:
+    - podsecuritypolicies
+    resourceNames:
+    - {{ template "kube-prometheus-stack.fullname" . }}-psp
+    verbs:
+    - use
+{{- end -}}

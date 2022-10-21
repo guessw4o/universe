@@ -1,0 +1,16 @@
+{{- if .Values.blackbox.pspEnabled }}
+apiVersion: {{ template "rbac.apiVersion" . }}
+kind: RoleBinding
+metadata:
+  labels:
+    {{- include "kube-prometheus-stack.labels" . | nindent 4 }}
+  name: {{ template "kube-prometheus-stack.fullname" . }}
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "kube-prometheus-stack.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "kube-prometheus-stack.blackbox.serviceAccountName" . }}
+{{- end -}}

@@ -1,0 +1,12 @@
+{{- if and .Values.blackbox.config (eq .Values.blackbox.configExistingSecretName "") }}
+apiVersion: v1
+kind: {{ if .Values.blackbox.secretConfig -}} Secret {{- else -}} ConfigMap {{- end }}
+metadata:
+  name: {{ template "kube-prometheus-stack.fullname" . }}
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  labels:
+    {{- include "kube-prometheus-stack.labels" . | nindent 4 }}
+{{ if .Values.blackbox.secretConfig -}} stringData: {{- else -}} data: {{- end }}
+  blackbox.yaml: |
+{{ toYaml .Values.blackbox.config | indent 4 }}
+{{- end }}

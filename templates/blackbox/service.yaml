@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.blackbox.service.annotations }}
+  annotations:
+    {{- toYaml .Values.blackbox.service.annotations | nindent 4 }}
+{{- end }}
+  name: {{ template "kube-prometheus-stack.fullname" . }}-blackbox
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  labels:
+    {{ include "kube-prometheus-stack.labels" . | indent 4 }}
+{{- if .Values.blackbox.service.labels }}
+{{ toYaml .Values.blackbox.service.labels | indent 4 }}
+{{- end }}
+spec:
+  type: {{ .Values.blackbox.service.type }}
+  ports:
+    - port: {{ .Values.blackbox.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+{{- if .Values.blackbox.service.externalIPs }}
+  externalIPs:
+{{ toYaml .Values.blackbox.service.externalIPs | indent 4 }}
+{{- end }}
+  selector:
+    app.kubernetes.io/name: blackbox
+  type: "{{ .Values.blackbox.service.type }}"
